@@ -20,14 +20,10 @@ function myError() {
 }
 
 const refs = {
-  form: document.querySelector('.search-form'),  
+  form: document.querySelector('.search-form'),
   picturesLIst: document.querySelector('.gallery'),
 };
-// const element = document.getElementById('.my-element-selector');
-// element.scrollIntoView({
-//   behavior: 'smooth',
-//   block: 'end',
-// });
+
 const NewApiService = new PictureApiService();
 refs.form.addEventListener('submit', onSearch);
 const loadMoreBtn = new LoadMoreBtn({ selector: '[data-action="load-more"]', hidden: true });
@@ -36,25 +32,29 @@ function onSearch(e) {
   e.preventDefault();
   clearPisturesList();
   NewApiService.searchQuery = e.currentTarget.elements.query.value.trim();
+
   loadMoreBtn.show();
   loadMoreBtn.disable();
   NewApiService.resetPage();
   NewApiService.fetchPictures().then(picturesShow).then(loadMoreBtn.enable());
 }
 
-
 loadMoreBtn.refs.button.addEventListener('click', onLoadMore);
 function onLoadMore() {
-     loadMoreBtn.disable();
+  loadMoreBtn.disable();
   NewApiService.fetchPictures().then(picturesShow).then(loadMoreBtn.enable());
 }
 
 const picturesShow = hits => {
+  if (hits.length <= 11) {
+    loadMoreBtn.hide();
+  }
   if (hits.length === 0) {
     myError();
   }
   if (hits.length >= 1) {
     refs.picturesLIst.insertAdjacentHTML('beforeend', pictureHbs(hits));
+    refs.picturesLIst.scrollIntoView({ behavior: 'smooth', block: 'end' });
     infoNotification();
   }
 };
